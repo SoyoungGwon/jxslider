@@ -1443,13 +1443,16 @@ JXSLIDER.prototype.addEventDrag = function()
             // loop가 아닐때
 
            var nAurr;
-            if ( _this.bControl  || _this.default.bGroupMove )
-            {
-                //컨트롤이 있을땐  _this.default.nView 단위로 이동하면 되고
-                nAurr = ( _this.default.nView == 1 )? 1 : _this.default.nView ; //몇칸을 더할것인지
-                //nAurr = _this.default.nView ; //몇칸을 더할것인지
 
-                //console.log('end   ' , nAurr )
+           //console.log('end  aa ' , nAurr  , _this.nAddStep)
+
+            //if ( _this.bControl  || _this.default.bGroupMove )
+            if ( _this.default.bGroupMove )
+            {
+
+                //컨트롤이 있을땐  _this.default.nView 단위로 이동하면 되고
+                //nAurr = ( _this.default.nView == 1 )? 1 : _this.default.nView ; //몇칸을 더할것인지
+                nAurr = _this.default.nView ; //몇칸을 더할것인지
             }
             else
             {
@@ -1463,6 +1466,8 @@ JXSLIDER.prototype.addEventDrag = function()
                 {
                     nAurr = Math.ceil( Math.abs ( nCY / _this.nMove  ) ); //몇칸을 더할것인지
                 }
+
+                console.log('end  bb ' , nAurr )
 
             }
 
@@ -1504,11 +1509,22 @@ JXSLIDER.prototype.addEventDrag = function()
                 {
                     //nAurr++; //무조건 반내림을 해서:ceil 왼쪽으로 할땐 1을 더해주자
                     _this.nCurr += nAurr;
-                    if ( _this.nCurr  > _this.nTotal   - _this.default.nView )
-                    {
-                        _this.nCurr = _this.nTotal  - _this.default.nView ;
-                    }
 
+                    if ( _this.bControl )
+                    {
+                        if ( _this.nCurr  > _this.nTotal  - 1 )
+                        {
+                            _this.nCurr = _this.nTotal  - 1 ;
+                        }
+                    }
+                    else
+                    {
+                        if ( _this.nCurr  > _this.nTotal   - _this.default.nView )
+                        {
+                            _this.nCurr = _this.nTotal  - _this.default.nView ;
+                        }
+
+                    }
                 }
 
             }//notLoopLeftUpDrag
@@ -1520,7 +1536,8 @@ JXSLIDER.prototype.addEventDrag = function()
                     _this.bMovIng = true;
                 }
 
-                if ( _this.bControl || _this.default.bGroupMove )
+                //if ( _this.bControl || _this.default.bGroupMove )
+                if ( _this.default.bGroupMove )
                 {
                     _this.nCurr -= _this.default.nView;
                     _this.nCurrPaging = Math.floor( _this.nCurr/_this.default.nView );
