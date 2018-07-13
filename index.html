@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>jslider</title>
+    <meta charset="UTF-8">
+    <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=720, user-scalable=no, target-densityDpi=device-dpi">
+
+    <!-- <link rel="stylesheet" href="resources/css/jxslider-ver-1.css"> -->
+    <link rel="stylesheet" href="resources/css/jxslider-ver-x1.css">
+
+    <script src="../jquery-1.9.1.min.js"></script>
+    <script src="../jquery-migrate-1.2.1.min.js"></script>
+     <!-- <script src="resources/js/jxslider-ver-2.js"></script> -->
+     <!-- <script src="resources/js/jxslider-ver-1.js"></script> -->
+     <!-- <script src="resources/js/jxslider-ver-2.js"></script> -->
+     <!-- <script src="resources/js/jquery.easing.1.3.js"></script>      -->
+     <!-- <script src="resources/js/jxslider-ver-4.js"></script> -->
+     <!-- <script src="resources/js/jxslider-ver-5.js"></script> -->
+      <!-- <script src="resources/js/jxslider-ver-7.js"></script> --> <!-- 리콜 함수까지 완성 -->
+      <!-- <script src="resources/js/jxslider-ver-8.js"></script> --> <!-- 반응형 못함 lv rv 를 사용안하기로 하고 action 만짐-->
+     <!-- <script src="resources/js/jxslider-ver-9.js"></script> --> <!-- action쪽 보강해야할듯 -->
+     <!-- <script src="resources/js/jxslider-ver-10.js"></script> --> <!-- rcal rmv 함수로 재정의-->
+     <script src="resources/js/jxslider-ver-x1.js"></script> <!-- rcal rmv 함수로 재정의-->
+
+
+    <style>
+
+    * {margin:0;padding:0;}
+    html , body {height: 100%;}
+    ul {list-style: none;}
+
+    img {display: block;}
+
+    body {overflow-x: hidden;}
+    .cont {--border: #f00 solid 1px;overflow: hidden;height: 80%;}
+    .cont .jx-slider {--padding:  0 10%;}
+    .cont .jx-slider .jx-box {--width: calc(800/1080*100vw);margin: 0 auto; /*width: 1960px;left: 50%;margin-left: -980px;*/}
+    .cont .jx-slider .jx-box .jx-wrap {--margin-left:-1414px;--margin-left:calc(360*-0px);} /*backcopy 0 이상일 경우만  준다*/
+
+    .num {position: absolute;left:0;top:0;}
+
+
+
+    .list > li {display:  none; }
+    .list > li.on {display:  block; }
+
+
+    .jx-slider .jx-control {
+    position: absolute;
+    text-align: center;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+    </style>
+
+    <script>
+
+    let a = 1;
+    var b = 2;
+    if  (b == 2)
+    {
+        a = 2
+
+    }
+
+    console.log('a   ' , a )
+    //pc에서 드래그 해야할땐
+    window.document.ondragstart = new Function("return false");    //드래그 금지
+
+
+
+    $(function(e)
+    //$(window).load(function()
+    {
+        // function jxslider(      obj                 , nView ,  nMargin , bAuto , nAutoSpeed , bLoop  , bMobile , reCallFnc ) false
+        //var jx = new JXSLIDER( $(".jxslider")  ,  2      , 0        , true          , 3000       , true , true   );
+
+
+        $(".jx-slider").each( function(i , e)
+        {
+            //jxsliderInit( $(this) );
+        });
+
+        var jx = jxsliderInit( $(".jx-slider") );
+
+        $(window).resize(function(event)
+        {
+            /* 반응형 염두 하고 보여주기를 2개로 바꿀때 */
+            //jx.nView = 2;
+            //console.log(jx.nView)
+        });
+
+        //jxsliderInit();
+
+    })
+
+    function jxsliderInit(obj)
+    {
+         var $this = obj;
+        var view = $this.data("view");
+        var start = $this.data("start");
+        var margin = $this.data("margin");
+        var auto = $this.data("auto");
+        var autospeed = $this.data("autospeed");
+        var ulspeed = $this.data("ulspeed");
+        var loop = $this.data("loop");
+         var drag = $this.data("dragg");
+        var resize = $this.data("resize");
+        var backcopy = $this.data("backcopy");
+        var nSans = $this.data("sans");
+        var sDirection = $this.data("direction");
+        var bAction = $this.data("action");
+        var bGroupMove = $this.data("groupmove");
+        var call = $this.data("call");
+
+
+
+
+         var option =
+        {
+            nView : view, //화면에 몇개의 li를 보일것인가 (기본=1)
+            nStart : start, //앞에 li를 뒤로 붙이는경우. 즉 외부에서 몇번째를 처음부터 보여줄것인가를 정할때. 이걸 정하면 nBackCopy값이 작동 안함  (*이걸 사용하면 nBackCopy값은 0이됨  *loop가 false가 될경우만 작동)
+            nBackCopy : backcopy, //뒤에 li를 앞으로 붙임.css로 ul의 margin-left로 센터 조정해야함. nStart가 0이여야함 *loop가 false가 될경우만 작동
+            nMargin : margin , //li간에 간격(단위 px)
+            nUlSpeed : ulspeed, //이동속도 (기본=400 > 0.4초 )
+            bAuto : auto, //자동 움직임 (true or false:기본)
+            nAutoSpeed : autospeed, //bAuto가 true일경우 몇초 단위로 자동을 시킬것인가 ( 기본=3000 > 3초 )
+            bLoop : loop, //반복으로 로테이션 (true or false:기본)
+            bDrag : drag, //드래그 여부 (true or false:기본)
+            bResize : resize, //li 객체를 jxbox 박스 기준으로 리사징을 할것인가 여부(true or false:기본)
+            nSans : nSans, //드래그 온하고 오프햇을때 드래그 한정도에 따라서 다시 제자리로 오느냐 아님 이동하느냐에 민감도 ( 기본값:10 )
+            //sDirection : sDirection, //방향
+            bAction : bAction, //본인을 클릭하면 함수 실행
+            bGroupMove : bGroupMove, //움직일때 view가 3일때 한칸씩 움직이는게 기본이지만(단 페이징 있을때 예외) 3칸씩 움직이도록 하고 싶을때
+             reCallFnc : $this.data("call")
+
+        };
+
+        return new JXSLIDER( $this  ,  option );
+
+    }
+
+
+    function call2(v)
+    {
+        console.log("외부 함수 실행 ---------------------" , v);
+        //$(".list > li").eq(v).addClass(' on').siblings().removeClass(' on');
+    }
+
+
+
+    function addEventControl()
+    {
+
+    }
+
+    </script>
+
+</head>
+<body>
+
+false   true 111
+
+
+
+<section class="cont">
+    <div class="jx-slider" data-view ="3" data-groupmove ="false" data-margin="0" data-auto ="false" data-autospeed ="1000" data-ulspeed ="400" data-loop = "true" data-drag = "true" data-resize ="true" data-call="" data-start="101" data-backcopy="1" data-sans="0" data-direction="v" data-action="true">
+
+        <div class="jx-box">
+            <ul class="jx-wrap">
+                <li class="jx-unit"><a class="jx-cont" href="http://www.naver.com"><span class="thumb"><img src="resources/imgs/img_1.jpg" alt=""></span></a></li>
+                <li class="jx-unit"><a class="jx-cont" href="http://www.naver.com"><span class="thumb"><img src="resources/imgs/img_2.jpg" alt=""></span></a></li>
+                <li class="jx-unit"><a class="jx-cont" href="http://www.naver.com"><span class="thumb"><img src="resources/imgs/img_3.jpg" alt=""></span></a></li>
+                <li class="jx-unit"><a class="jx-cont" href="http://www.naver.com"><span class="thumb"><img src="resources/imgs/img_4.jpg" alt=""></span></a></li>
+                <li class="jx-unit"><a class="jx-cont" href="http://www.naver.com"><span class="thumb"><img src="resources/imgs/img_5.jpg" alt=""></span></a></li>
+                 <li class="jx-unit"><a class="jx-cont"><span class="thumb"><img src="resources/imgs/img_6.jpg" alt=""></span></a></li>
+                <li class="jx-unit"><a class="jx-cont"><span class="thumb"><img src="resources/imgs/img_1.jpg" alt=""></span></a></li>
+                <li class="jx-unit"><a class="jx-cont"><span class="thumb"><img src="resources/imgs/img_2.jpg" alt=""></span></a></li>
+                <li class="jx-unit"><a class="jx-cont"><span class="thumb"><img src="resources/imgs/img_3.jpg" alt=""></span></a></li>
+                <li class="jx-unit"><a class="jx-cont"><span class="thumb"><img src="resources/imgs/img_3.jpg" alt=""></span></a></li>
+                <li class="jx-unit"><a class="jx-cont"><span class="thumb"><img src="resources/imgs/img_3.jpg" alt=""></span></a></li>
+            </ul>
+        </div>
+
+        <span class="jx-btn jx-left">&lt; </span>
+        <span class="jx-btn jx-right">&gt; </span>
+
+
+        <div class="jx-control"> </div>
+
+        <div class="jx-stop">stop</div>
+    </div>
+</section>
+
+<h1>옵션 특이사항 설명</h1>
+<dl>
+    <dt><strong>1 .data-start = 2 , data-groupmove = true , data-view = 3</strong></dt>
+    <dd>data-start은 몇번째 즉 2번째 객체를 처음부터 보여달라는 것인데 <br> data-groupmove = false면 몇번째 객체이지만 true면 그룹단위(paging)로 움직인다. <br> 몇번째 그룹에 속해있는지 data-view에 따라 달라진다. <br>
+        data-view = 3이란 것은 3개씩 그룹으로 이해하면 된다. <br><br>
+
+        ex) <br>
+        data-start = 2 는 결국 1 , 2 , 3 까지는 무조건 2페이지 에 속하고 <br>
+        4 , 5 , 6 은 3페이지에 속한다.<br><br>
+
+
+    </dd>
+    <dt><strong>2 . data-start = 1 , data-backcopy = 1 </strong></dt>
+    <dd>data-backcopy 옵션보다 data-start 옵션이 더 강하다. 그래서 앞에 객체를 뒤로 붙이게 된다.<br><br></dd>
+
+    <dt><strong>3 . data-start = 1 , data-backcopy = 1 </strong></dt>
+    <dd>data-backcopy 옵션보다 data-start 옵션이 더 강하다. 그래서 앞에 객체를 뒤로 붙이게 된다.<br><br></dd>
+
+
+
+</dl>
+
+
+<ul class="list">
+    <li class="on">
+        <!-- <div class="jxslider" data-view ="1" data-margin="0" data-auto ="false" data-autospeed ="0" data-loop = "true" data-mobile = "true" data-resize ="true" data-backcopy="2">
+        <div class="jxbox">
+            <ul>
+                <li><a><span class="thumb"><img src="resources/imgs/img_1.jpg" alt=""></span></a></li>
+                <li><a><span class="thumb"><img src="resources/imgs/img_2.jpg" alt=""></span></a></li>
+                <li><a><span class="thumb"><img src="resources/imgs/img_3.jpg" alt=""></span></a></li>
+                <li><a><span class="thumb"><img src="resources/imgs/img_4.jpg" alt=""></span></a></li>
+                <li><a><span class="thumb"><img src="resources/imgs/img_5.jpg" alt=""></span></a></li>
+                <li><a><span class="thumb"><img src="resources/imgs/img_6.jpg" alt=""></span></a></li>
+                <li><a><span class="thumb"><img src="resources/imgs/img_6.jpg" alt=""></span></a></li>
+            </ul>
+        </div>
+
+        <span class="jxbtn jxleft">&lt; </span>
+        <span class="jxbtn jxright">&gt; </span>
+
+        <div class="jxcontrol"> </div>
+           </div> -->
+    </li>
+    <li>2</li>
+    <li>3</li>
+    <li>4</li>
+    <li>5</li>
+    <li>6</li>
+</ul>
+
+</body>
+</html>
