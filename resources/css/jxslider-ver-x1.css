@@ -1,4 +1,4 @@
-.jx-slider {position: relative;}
+.jx-slider {position: relative;--overflow: hidden;}
 .jx-slider.jx-vertical {height: 100%;}
 .jx-slider .jx-box {position: relative;box-sizing: border-box; height: inherit; }
 .jx-slider .jx-box > .jx-wrap {position: relative;overflow: hidden;--width: 2000%;}

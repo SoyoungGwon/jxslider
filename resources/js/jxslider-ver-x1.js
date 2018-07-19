@@ -24,37 +24,37 @@ jQuery.extend( jQuery.easing,
 function JXSLIDER( obj ,   option  )
 {
     var _this = this;
-    this.default =
+    this.defaults =
     {
         nView            : 1 , //화면에 몇개의 객체를 보여줄것인가
+        sDirection      : "horizontal" , //움직이는 방향 or vertical
+        nMargin         : 0 , //sDirection에 따라 margin-right or margin-bottom 값
+        nAutoSpeed   : 3000 , //자동롤링 속도
+        nUlSpeed       : 400 , //움직이는 속도<1601></1601>
+        bAuto           : false , //자동롤링
+        bDrag         : true , //드래그 가능
+        bLoop           : true , //무한 반복
+        bResize         : true ,  //li 객체를 jxbox 박스 기준으로 리사징을 할것인가 여부(true:기본 or false)
+        nSans           : 100 , //드래그 온하고 오프햇을때 드래그 한정도에 따라서 다시 제자리로 오느냐 아님 이동하느냐에 민감도 ( 기본값:10 )
+        bGroupMove  : false , //nView에 값에 따라서 이동을 한꺼번에 할것인가 아닌가
+        bAction         : false , //li 객체를 클릭하면 칸 차이를 인식하여 이동 링크가 아닌 이동 loop를 true로 바꿔야할듯
         nStart            : 0 , // 앞객체를 뒤로 붙여서 몇번째 객체를 처음부터 보여줄려할때 , nBackCopy작동안함. *loop가 false가 될경우만 작동
         nBackCopy     : 0 , // 뒤객체를 앞으로 붙여서 센터 정렬. margin-left로 센터 조정해야함. nStart가 0이여야함 *loop가 false가 될경우만 작동
-        nMargin         : 0 , //sDirection에 따라 margin-right or margin-bottom 값
-        nUlSpeed       : 400 , //움직이는 속도
-        bAuto           : false , //자동롤링
-        nAutoSpeed   : 3000 , //자동롤링 속도
-        bLoop           : true , //무한 반복
-        //bMobile        : false , //PC or 모바일 인지를 구분 한다기 보단 드래그 가능여부인데 모바일에서 드래그 하고 싶으면 true PC 에서 드래그할려면 false를 줘야함
-        bResize         : true ,  //li 객체를 jxbox 박스 기준으로 리사징을 할것인가 여부(true:기본 or false)
-        nSans           : 10 , //드래그 온하고 오프햇을때 드래그 한정도에 따라서 다시 제자리로 오느냐 아님 이동하느냐에 민감도 ( 기본값:10 )
-        sDirection      : "horizontal" , //움직이는 방향 or vertical
-        bAction         : false , //li 객체를 클릭하면 칸 차이를 인식하여 이동 링크가 아닌 이동 loop를 true로 바꿔야할듯
-        bGroupMove  : false , //nView에 값에 따라서 이동을 한꺼번에 할것인가 아닌가
-        bDrag         : true , //드래그 가능
         oResponsive : [ ] ,
+        bAaptiveHeight : false, //높이값에 맞게 조절
+
+
+
         reCallFnc       : function(v)
                             {
-                                 console.log('default reCallFnc' , v)
+                                 console.log('defaults reCallFnc' , v)
                             }
     }
 
+    $.extend(true ,  this.defaults , option );
 
-
-    $.extend(true ,  this.default , option );
-
-    this.oriView = this.default.nView;
-
-
+    this.oriView = this.defaults.nView; //반응형으로 인한 원래 nView값을 담을 변수
+    this.nWinBox = $(window).width(); // 처음에 윈도우 사이즈
 
     //피씨와 모바일 체크
     (function(a,b)
@@ -75,8 +75,6 @@ function JXSLIDER( obj ,   option  )
     })(navigator.userAgent||navigator.vendor||window.opera,'m/');
 
 
-
-
     this.jxslider = obj;
     this.jxbox = this.jxslider.find(".jx-box"); //ul을 감싸고 있는 부모 클래스
     this.jxwrap = this.jxbox.find("> .jx-wrap");
@@ -84,7 +82,7 @@ function JXSLIDER( obj ,   option  )
     this.bMovIng = false; // 드래그 이용하여 움직임이 시작했느냐
     this.bControl = false; //아래 페이징이 있을겨우를 참조 하는 변수
     this.nTotal = this.jxwrap.find(">.jx-unit").size(); // .jxunit 의 총 갯수
-    //this.nTotalPaging = Math.ceil( this.nTotal /  _this.default.nView ); //아래 페이징이 있을경우 총 페이징 값
+    //this.nTotalPaging = Math.ceil( this.nTotal /  _this.defaults.nView ); //아래 페이징이 있을경우 총 페이징 값
 
     this.bPcIng = false; // pc에선 마우스 무브가 계속 움직이므로 그러나 공통으로 하면 된다.
     this.nCopy = 0; //드래그 하는 동안 몇개의 .jxunit를 이동할것인가를 담는 변수
@@ -93,8 +91,6 @@ function JXSLIDER( obj ,   option  )
     this.nAddStep= 0; // 몇개의 .jxunit가 이동하는
     this.autoTime;
     this.sEase = 'easeOutCubic';
-
-
 
 
     //.jxunit의 고유 데이터 넘버를 넣어버린다.
@@ -107,17 +103,17 @@ function JXSLIDER( obj ,   option  )
 
      //this.bResize = ( option["bResize"]  != undefined && option["bResize"]  != "" ) ? option["bResize"] :  false; //리사이징 여부
 
-    if ( _this.default.sDirection != "horizontal")
+    if ( _this.defaults.sDirection != "horizontal")
     {
         //세로방향일때고 리사이징일때만
-        if ( _this.default.bResize )
+        if ( _this.defaults.bResize )
         {
             this.jxslider.addClass("jx-vertical");
         }
     }
 
     //페이징이 존재하면  그룹별 움직임에 true를 넣어버리고 or 그룹별 움직임이 true라면
-    //if ( this.jxslider.find(".jxcontrol").size() > 0 || this.default.bGroupMove )
+    //if ( this.jxslider.find(".jxcontrol").size() > 0 || this.defaults.bGroupMove )
 
     if ( this.jxslider.find(".jx-control").size() > 0 )
     {
@@ -130,32 +126,23 @@ function JXSLIDER( obj ,   option  )
 
     _this.reSet();
 
-    // //re
-    // if ( this.default.bGroupMove )
-    // {
-    //     this.nTotalPaging = Math.ceil( this.nTotal /  _this.default.nView ); //아래 페이징이 있을경우 총 페이징 값
-    // }
-    // else
-    // {
-    //     this.nTotalPaging = this.nTotal;
-    // }
-
-    if ( _this.default.bLoop )
+    if ( _this.defaults.bLoop )
     {
-        if ( this.default.nStart == 0 )
+        if ( this.defaults.nStart == 0 )
         {
             this.nCurr = this.nCurrPaging = 0;
 
-            if ( this.default.bGroupMove )
+
+            if ( this.defaults.bGroupMove )
             {
-                this.default.nBackCopy = this.default.nBackCopy%this.default.nView;
+                this.defaults.nBackCopy = this.defaults.nBackCopy%this.defaults.nView;
             }
         }
         else
         {
-            _this.default.nBackCopy = 0;
-            //if ( _this.default.bGroupMove  || this.bControl )
-            if ( _this.default.bGroupMove )
+            _this.defaults.nBackCopy = 0;
+            //if ( _this.defaults.bGroupMove  || this.bControl )
+            if ( _this.defaults.bGroupMove )
             {
                 /*
                 동작이 그룹단위로 움직여야 할경우인데
@@ -163,59 +150,59 @@ function JXSLIDER( obj ,   option  )
                 nView 값을 넣어버려야한다.
                 */
 
-                //console.log(  '계산 '  , this.default.nStart , this.nTotal  , Math.ceil( _this.default.nStart /_this.default.nView ) , Math.ceil( _this.default.nStart /_this.default.nView ) * _this.default.nView )
-                this.default.nStart = Math.ceil( _this.default.nStart /_this.default.nView ) * _this.default.nView; //계산을 맞춰서 해야해서 그룹별이나 버튼이 잇을때는 다시 값을 바꿔야함
+                //console.log(  '계산 '  , this.defaults.nStart , this.nTotal  , Math.ceil( _this.defaults.nStart /_this.defaults.nView ) , Math.ceil( _this.defaults.nStart /_this.defaults.nView ) * _this.defaults.nView )
+                this.defaults.nStart = Math.ceil( _this.defaults.nStart /_this.defaults.nView ) * _this.defaults.nView; //계산을 맞춰서 해야해서 그룹별이나 버튼이 잇을때는 다시 값을 바꿔야함
 
-                if ( this.default.nStart > this.nTotal-1 )
+                if ( this.defaults.nStart > this.nTotal-1 )
                 {
-                    this.default.nStart = this.nTotal-1;
+                    this.defaults.nStart = this.nTotal-1;
                 }
 
-                //console.log('--aaaaa ' , this.default.nStart  , this.nTotal)
+                //console.log('--aaaaa ' , this.defaults.nStart  , this.nTotal)
 
-                this.nCurrPaging = Math.floor( _this.default.nStart /_this.default.nView ) ; //아래 페이징이 있을경우 초기값
+                this.nCurrPaging = Math.floor( _this.defaults.nStart /_this.defaults.nView ) ; //아래 페이징이 있을경우 초기값
             }
             else
             {
-                if ( this.default.nStart > this.nTotal-1 )
+                if ( this.defaults.nStart > this.nTotal-1 )
                 {
-                    this.default.nStart = this.nTotal-1;
+                    this.defaults.nStart = this.nTotal-1;
                 }
 
-                this.nCurrPaging = this.default.nStart;
+                this.nCurrPaging = this.defaults.nStart;
 
-                //console.log('-- ' , this.default.nStart  , this.nTotal)
+                //console.log('-- ' , this.defaults.nStart  , this.nTotal)
             }
 
-            this.nCurr = _this.default.nStart;
+            this.nCurr = _this.defaults.nStart;
             //console.log( _this.nCurrPaging )
         }
     }
     else
     {
-        this.nCurr = this.nCurrPaging = this.default.nStart = this.default.nBackCopy = 0;
+        this.nCurr = this.nCurrPaging = this.defaults.nStart = this.defaults.nBackCopy = 0;
     }
 
 
-    if ( this.default.bAuto )
+    if ( this.defaults.bAuto )
     {
         this.addEventAuto(true);
     }
 
 
-    if ( !_this.default.bResize )
+    if ( !_this.defaults.bResize )
     {
         //리사이징이 아닐때 jx-unit 객체 가로 세로 사이즈를 가지고 움직일 값을 담는다
-        if ( _this.default.sDirection == "horizontal")
+        if ( _this.defaults.sDirection == "horizontal")
         {
-            this.nMove =   this.jxwrap.find(">.jx-unit").innerWidth() + _this.default.nMargin;
-            this.jxwrap.find(">.jx-unit").css(  {"margin-right": _this.default.nMargin} );
+            this.nMove =   this.jxwrap.find(">.jx-unit").innerWidth() + _this.defaults.nMargin;
+            this.jxwrap.find(">.jx-unit").css(  {"margin-right": _this.defaults.nMargin} );
             this.jxwrap.css( {"width": this.nMove * this.nTotal } ) // ul의 가로 사이즈를 .jx-unit의 갯수만큼
         }
         else
         {
-            this.nMove =   this.jxwrap.find(">.jx-unit").innerHeight() + _this.default.nMargin;
-            this.jxwrap.find(">.jx-unit").css(  {"float": "none", "margin-bottom": _this.default.nMargin } );
+            this.nMove =   this.jxwrap.find(">.jx-unit").innerHeight() + _this.defaults.nMargin;
+            this.jxwrap.find(">.jx-unit").css(  {"float": "none", "margin-bottom": _this.defaults.nMargin } );
             this.jxwrap.css( {"height": this.nMove * this.nTotal } ) // ul의 가로 사이즈를 .jx-unit의 갯수만큼
         }
     }
@@ -230,29 +217,18 @@ function JXSLIDER( obj ,   option  )
        $(window).trigger("resize");
     }
 
-
-    //여기는 진짜 페이징이 존재할것인가 할때
-    // if ( this.bControl )
-    // //if ( this.default.bGroupMove )
-    // {
-
-    //     this.jxcontrol = this.jxslider.find(".jx-control");
-    //     //console.log('시작 ' , this.bMovIng)
-    //     this.addEventControl(); //아래 페이징이 있는 경우만 이벤트 추가
-    // }
-
-    if ( _this.default.bLoop )
+    if ( _this.defaults.bLoop )
     {
-        if( _this.default.nBackCopy != 0 )
+        if( _this.defaults.nBackCopy != 0 )
         {
-            for ( var i = 0 ; i < _this.default.nBackCopy ; i++)
+            for ( var i = 0 ; i < _this.defaults.nBackCopy ; i++)
             {
                 this.jxwrap.prepend( this.jxwrap.find(">.jx-unit:last") );
             }
         }
         else
         {
-            for ( var i = 0 ; i < _this.default.nStart ; i++)
+            for ( var i = 0 ; i < _this.defaults.nStart ; i++)
             {
                 this.jxwrap.append( this.jxwrap.find(">.jx-unit:first") );
             }
@@ -264,7 +240,12 @@ function JXSLIDER( obj ,   option  )
     //this.bMobile = ( option["bMobile"]  != undefined && option["bMobile"]  != "" ) ? option["bMobile"] :  false; // 모바일 체크이다. 기본은 pc 작동
 
 
-    _this.jxwrap.find(">.jx-unit").eq( _this.default.nBackCopy ).addClass("on"); //처음에 한번
+    _this.jxwrap.find(">.jx-unit").eq( _this.defaults.nBackCopy ).addClass("on"); //처음에 한번
+
+    if ( _this.defaults.bAaptiveHeight )
+    {
+        _this.jxwrap.css({"height" : _this.jxwrap.find(">.jx-unit").eq( _this.defaults.nBackCopy ).innerHeight() });
+    }
 
 
     //좌우 버튼이 있는 경우만 좌우 버튼 이벤트 추간
@@ -278,19 +259,12 @@ function JXSLIDER( obj ,   option  )
         this.addEventStop();
     }
 
-    if ( _this.default.bAction )
+    if ( _this.defaults.bAction )
     {
-        //console.log('a')
         this.addEventAction();
-
-
-    }
-    else
-    {
-//        this.addEventDrag();
     }
 
-    if( _this.default.bDrag )
+    if( _this.defaults.bDrag )
     {
         this.addEventDrag();
     }
@@ -300,35 +274,26 @@ function JXSLIDER( obj ,   option  )
 JXSLIDER.prototype.reSet = function()
 {
     var _this = this;
+    //console.log('defaults  ' , this.defaults.oResponsive.length , this.defaults.sDirection , $(window).width() );
 
-
-    //console.log('default  ' , this.default.oResponsive.length , this.default.sDirection , $(window).width() );
-
-    if ( this.default.sDirection == "horizontal")
+    if ( this.defaults.sDirection == "horizontal")
     {
         //가로모드일때만 반응형
-
-        var leng = this.default.oResponsive.length;
-
+        var leng = this.defaults.oResponsive.length;
         //console.log( leng )
-
         if ( leng > 0 )
         {
+            this.defaults.bGroupMove = false;
 
-            this.default.bGroupMove = false;
-
-            for(var i in this.default.oResponsive )
+            for(var i in this.defaults.oResponsive )
             {
-                //console.log('aaaa   ' , i  , leng-1 - i )
-
-                if ( $(window).width()+17 >= this.default.oResponsive[ leng-1 - i ].breakpoint )
+                if ( $(window).width()+17 >= this.defaults.oResponsive[ leng-1 - i ].breakpoint )
                 {
-                    this.default.nView = this.oriView;
-
+                    this.defaults.nView = this.oriView;
                 }
                 else
                 {
-                    this.default.nView = this.default.oResponsive[ leng-1 - i ].settings.nView;
+                    this.defaults.nView = this.defaults.oResponsive[ leng-1 - i ].settings.nView;
                     break;
                 }
             }//for
@@ -336,31 +301,24 @@ JXSLIDER.prototype.reSet = function()
     }//if
 
     //re
-    if ( this.default.bGroupMove )
+    if ( this.defaults.bGroupMove )
     {
-        this.nTotalPaging = Math.ceil( this.nTotal /  _this.default.nView ); //아래 페이징이 있을경우 총 페이징 값
+        this.nTotalPaging = Math.ceil( this.nTotal /  _this.defaults.nView ); //아래 페이징이 있을경우 총 페이징 값
     }
      else
     {
         this.nTotalPaging = this.nTotal;
     }
 
-
     if ( this.bControl )
-    //if ( this.default.bGroupMove )
+    //if ( this.defaults.bGroupMove )
     {
-
         this.jxcontrol = this.jxslider.find(".jx-control");
         //console.log('시작 ' , this.bMovIng)
         this.addEventControl(); //아래 페이징이 있는 경우만 이벤트 추가
     }
 
-    //console.log('this.nTotalPaging   ' , this.nTotalPaging , this.nTotal , _this.default.nView)
-
-
-
 }//JXSLIDER.prototype.reSet
-
 
 //본인 자신을 클릭하면 움직임 추가
 JXSLIDER.prototype.addEventAction = function(b)
@@ -385,7 +343,7 @@ JXSLIDER.prototype.addEventAction = function(b)
     /*
         링크가 있는경우가 문제이다
         pc 경우는 문제가 되기 때문에 드래그 기능을 못하도록 해는데
-        e.preventDefault(); 작동되게 하려면 click 이벤트를 넣어야한다.
+        e.preventDefault();작동되게 하려면 click 이벤트를 넣어야한다. }
     */
     //this.jxwrap.find(">.jx-unit").on("mouseup " , function(e)
     this.jxwrap.find(">.jx-unit").on("click" , function(e)
@@ -393,41 +351,41 @@ JXSLIDER.prototype.addEventAction = function(b)
 
         var nChr = numFind() - $(this).index();
 
-       if ( _this.default.bGroupMove )
+       if ( _this.defaults.bGroupMove )
        {
             //_this.right()
             if( nChr  < 0 )
             {
 
                 e.preventDefault();
-                if ( _this.nCurr + _this.default.nView > _this.nTotal-1 )
+                if ( _this.nCurr + _this.defaults.nView > _this.nTotal-1 )
                 {
                     _this.rcal( _this.nTotal - _this.nCurr );
                 }
                 else
                 {
-                    //_this.right( _this.default.nView );
-                    _this.rcal( _this.default.nView );
+                    //_this.right( _this.defaults.nView );
+                    _this.rcal( _this.defaults.nView );
                 }
             }
             else if( nChr > 0 )
             {
 
                 e.preventDefault();
-                if ( _this.nCurr - _this.default.nView < 0 && _this.nTotal % _this.default.nView != 0)
+                if ( _this.nCurr - _this.defaults.nView < 0 && _this.nTotal % _this.defaults.nView != 0)
                 {
-                    _this.lcal( _this.nTotal % _this.default.nView );
+                    _this.lcal( _this.nTotal % _this.defaults.nView );
                 }
                 else
                 {
-                    _this.lcal( _this.default.nView );
+                    _this.lcal( _this.defaults.nView );
                 }
             }
             else
             {
                 //console.log('m,m,')
             }
-            //var view = _this.default.nView;
+            //var view = _this.defaults.nView;
 
        }
        else
@@ -471,14 +429,14 @@ JXSLIDER.prototype.addEventStop = function(b)
         {
             //$(this).text("play");
             $(this).addClass("on");
-            _this.default.bAuto = false;
+            _this.defaults.bAuto = false;
             _this.addEventAuto(false);
         }
         else
         {
             //$(this).text("stop");
             $(this).removeClass("on");
-            _this.default.bAuto = true;
+            _this.defaults.bAuto = true;
             _this.addEventAuto(true);
         }
     });
@@ -498,7 +456,7 @@ JXSLIDER.prototype.addEventAuto = function(b)
             _this.right();
             //_this.lv();
 
-        } , _this.default.nAutoSpeed);
+        } , _this.defaults.nAutoSpeed);
     }
     else
     {
@@ -514,13 +472,13 @@ JXSLIDER.prototype.addEventBtns = function()
     this.jxslider.find(".jx-left").click(function(e)
     {
 
-        //console.log('jx-left ' , _this.nCurr , _this.default.bGroupMove)
+        //console.log('jx-left ' , _this.nCurr , _this.defaults.bGroupMove)
         _this.left();
     }).mouseenter(function(event)
     {
-        if ( _this.default.bAuto ) { _this.addEventAuto(false); }
+        if ( _this.defaults.bAuto ) { _this.addEventAuto(false); }
     }).mouseleave(function(event) {
-        if ( _this.default.bAuto ) { _this.addEventAuto(true); }
+        if ( _this.defaults.bAuto ) { _this.addEventAuto(true); }
         _this.bMovIng = false;
     });
 
@@ -533,9 +491,9 @@ JXSLIDER.prototype.addEventBtns = function()
 
     }).mouseenter(function(event)
     {
-        if ( _this.default.bAuto ) { _this.addEventAuto(false); }
+        if ( _this.defaults.bAuto ) { _this.addEventAuto(false); }
     }).mouseleave(function(event) {
-        if ( _this.default.bAuto ) { _this.addEventAuto(true); }
+        if ( _this.defaults.bAuto ) { _this.addEventAuto(true); }
 
         _this.bMovIng = false;
     });
@@ -548,15 +506,15 @@ JXSLIDER.prototype.left = function()
     if ( !_this.bIng )
     {
         _this.bIng = true;
-        if ( _this.default.bGroupMove )
+        if ( _this.defaults.bGroupMove )
         {
-            if ( _this.nCurr - _this.default.nView < 0 && _this.nTotal % _this.default.nView != 0)
+            if ( _this.nCurr - _this.defaults.nView < 0 && _this.nTotal % _this.defaults.nView != 0)
             {
-                _this.lcal( _this.nTotal % _this.default.nView );
+                _this.lcal( _this.nTotal % _this.defaults.nView );
             }
             else
             {
-                _this.lcal( _this.default.nView );
+                _this.lcal( _this.defaults.nView );
             }
         }
         else
@@ -564,7 +522,7 @@ JXSLIDER.prototype.left = function()
             _this.lcal( 1 );
         }
 
-        if ( _this.default.bAuto ) { _this.addEventAuto(true); }
+        if ( _this.defaults.bAuto ) { _this.addEventAuto(true); }
     }
 }//JXSLIDER.prototype.left
 
@@ -577,15 +535,16 @@ JXSLIDER.prototype.right = function()
     if ( !_this.bIng )
     {
         _this.bIng = true;
-        if ( _this.default.bGroupMove )
+        if ( _this.defaults.bGroupMove )
         {
-            if ( _this.nCurr + _this.default.nView > _this.nTotal-1 )
+            //console.log( 'right ' , _this.nCurr )
+            if ( _this.nCurr + _this.defaults.nView > _this.nTotal-1 )
             {
                 _this.rcal( _this.nTotal - _this.nCurr );
             }
             else
             {
-                _this.rcal( _this.default.nView );
+                _this.rcal( _this.defaults.nView );
             }
         }
         else
@@ -593,7 +552,7 @@ JXSLIDER.prototype.right = function()
             _this.rcal( 1 );
         }
 
-        if ( _this.default.bAuto ) { _this.addEventAuto(true); }
+        if ( _this.defaults.bAuto ) { _this.addEventAuto(true); }
     }
 }//JXSLIDER.prototype.right
 
@@ -609,8 +568,8 @@ JXSLIDER.prototype.lcal = function(n)
 
     if ( n == undefined ) { n = 1; }
 
-    //console.log('lv  ' , n , _this.default.bLoop )
-    if ( _this.default.bLoop )
+    //console.log('lv  ' , n , _this.defaults.bLoop )
+    if ( _this.defaults.bLoop )
     {
         //loop 일때
 
@@ -621,9 +580,9 @@ JXSLIDER.prototype.lcal = function(n)
            _this.nCurr =  _this.nTotal + _this.nCurr;
         }
 
-        if ( _this.default.bGroupMove )
+        if ( _this.defaults.bGroupMove )
         {
-            _this.nCurrPaging = _this.nCurr / _this.default.nView;
+            _this.nCurrPaging = _this.nCurr / _this.defaults.nView;
         }
 
         //console.log('lv bb ' , n , _this.nCurr )
@@ -633,17 +592,17 @@ JXSLIDER.prototype.lcal = function(n)
     else
     {
         //loop 아닐때
-        //if ( _this.bControl || _this.default.bGroupMove )
-        if ( _this.default.bGroupMove )
+        //if ( _this.bControl || _this.defaults.bGroupMove )
+        if ( _this.defaults.bGroupMove )
         {
             //컨트롤이 존재할때
-            if ( !_this.default.bAuto )
+            if ( !_this.defaults.bAuto )
             {
                 //자동이 아닐때
                 if ( _this.nCurrPaging > 0 )
                 {
                     _this.nCurrPaging--;
-                    _this.nCurr = _this.nCurrPaging * _this.default.nView;
+                    _this.nCurr = _this.nCurrPaging * _this.defaults.nView;
                     _this.lmv( _this.nCurr );
                 }
                 else
@@ -661,7 +620,7 @@ JXSLIDER.prototype.lcal = function(n)
                 {
                     _this.nCurrPaging = _this.nTotalPaging - 1;
                 }
-                _this.nCurr = _this.nCurrPaging * _this.default.nView;
+                _this.nCurr = _this.nCurrPaging * _this.defaults.nView;
                 _this.lmv( _this.nCurr );
 
             }
@@ -669,7 +628,7 @@ JXSLIDER.prototype.lcal = function(n)
         else
         {
             //컨트롤이 없을때
-            if ( !_this.default.bAuto )
+            if ( !_this.defaults.bAuto )
             {
                 if ( _this.nCurr > 0 )
                 {
@@ -687,13 +646,15 @@ JXSLIDER.prototype.lcal = function(n)
                 _this.nCurr -= n;
                 if ( _this.nCurr < 0 )
                 {
-                    _this.nCurr = _this.nTotal-_this.default.nView;
+                    _this.nCurr = _this.nTotal-_this.defaults.nView;
                 }
                 _this.lmv(_this.nCurr);
             }
 
+            _this.nCurrPaging = _this.nCurr;
+
         }// if ( _this.bControl )
-    }//if ( _this.default.bLoop )
+    }//if ( _this.defaults.bLoop )
 
 }//JXSLIDER.prototype.lcal
 
@@ -705,11 +666,10 @@ JXSLIDER.prototype.rcal = function(n)
 
     var n = n;
 
-
     if ( n == undefined ) { n = 1; }
 
     //console.log('rv ' , n )
-        if ( _this.default.bLoop )
+        if ( _this.defaults.bLoop )
         {
             //loop 일때
             _this.nCurr += n;
@@ -720,9 +680,9 @@ JXSLIDER.prototype.rcal = function(n)
                _this.nCurr = _this.nCurr - _this.nTotal;
             }
 
-            if ( _this.default.bGroupMove )
+            if ( _this.defaults.bGroupMove )
             {
-                _this.nCurrPaging = _this.nCurr / _this.default.nView;
+                _this.nCurrPaging = _this.nCurr / _this.defaults.nView;
             }
 
             //_this.right(1);
@@ -731,16 +691,16 @@ JXSLIDER.prototype.rcal = function(n)
         else
         {
             //loop 아닐때
-            //if ( _this.bControl || _this.default.bGroupMove )
-            if ( _this.default.bGroupMove )
+            //if ( _this.bControl || _this.defaults.bGroupMove )
+            if ( _this.defaults.bGroupMove )
             {
                 //그룹으로
-                if ( !_this.default.bAuto )
+                if ( !_this.defaults.bAuto )
                 {
                     if ( _this.nCurrPaging < _this.nTotalPaging - 1 )
                     {
                         _this.nCurrPaging++;
-                        _this.nCurr = _this.nCurrPaging * _this.default.nView;
+                        _this.nCurr = _this.nCurrPaging * _this.defaults.nView;
                         _this.rmv( _this.nCurr );
                     }
                     else
@@ -748,6 +708,7 @@ JXSLIDER.prototype.rcal = function(n)
                         //alert ("마지막 페이지");
                         _this.bIng = false;
                     }
+
                 }
                 else
                 {
@@ -756,16 +717,16 @@ JXSLIDER.prototype.rcal = function(n)
                     {
                         _this.nCurrPaging = 0;
                     }
-                    _this.nCurr = _this.nCurrPaging * _this.default.nView;
+                    _this.nCurr = _this.nCurrPaging * _this.defaults.nView;
                     _this.rmv( _this.nCurr );
                 }
             }
             else
             {
                 //그룹 아니고
-                if ( !_this.default.bAuto )
+                if ( !_this.defaults.bAuto )
                 {
-                    //if ( _this.nCurr < _this.nTotal-_this.default.nView )
+                    //if ( _this.nCurr < _this.nTotal-_this.defaults.nView )
                     if ( _this.nCurr < _this.nTotal - 1 )
                     {
                         _this.nCurr += n;
@@ -780,15 +741,17 @@ JXSLIDER.prototype.rcal = function(n)
                 else
                 {
                     _this.nCurr += n;
-                    //if ( _this.nCurr > _this.nTotal-_this.default.nView )
+                    //if ( _this.nCurr > _this.nTotal-_this.defaults.nView )
                     if ( _this.nCurr > _this.nTotal - 1 )
                     {
                         _this.nCurr = 0;
                     }
                     _this.rmv(_this.nCurr);
                 }
+
+                _this.nCurrPaging = _this.nCurr;
             }//if ( _this.bControl )
-        }//if ( _this.default.bLoop )
+        }//if ( _this.defaults.bLoop )
 
 }//rv
 
@@ -801,7 +764,7 @@ JXSLIDER.prototype.lmv = function(v)
     var ntx = _this.nMove * v * -1; //최종 움직일 칸 사이즈
 
     //console.log('ntx   ' , ntx )
-    if ( _this.default.bLoop )
+    if ( _this.defaults.bLoop )
     {
         _this.jxwrap.find(">.jx-unit").each(function(index, element)
         {
@@ -813,7 +776,7 @@ JXSLIDER.prototype.lmv = function(v)
         });
 
 
-        if( _this.default.sDirection == "horizontal")
+        if( _this.defaults.sDirection == "horizontal")
         {
             _this.jxwrap.css( {"left": ntx } );
         }
@@ -827,9 +790,9 @@ JXSLIDER.prototype.lmv = function(v)
     }
 
     //console.log('ntx   ' , ntx )
-    if ( _this.default.sDirection == "horizontal")
+    if ( _this.defaults.sDirection == "horizontal")
     {
-        _this.jxwrap.stop().animate( {"left": ntx } ,  _this.default.nUlSpeed , _this.sEase  ,function()
+        _this.jxwrap.stop().animate( {"left": ntx } ,  _this.defaults.nUlSpeed , _this.sEase  ,function()
         {
             _this.nEX = _this.jxwrap.position().left;
             //console.log('left end '  , _this.nEX , ntx)
@@ -840,7 +803,7 @@ JXSLIDER.prototype.lmv = function(v)
     else
     {
 
-        _this.jxwrap.stop().animate( {"top": ntx } ,  _this.default.nUlSpeed , _this.sEase  ,function()
+        _this.jxwrap.stop().animate( {"top": ntx } ,  _this.defaults.nUlSpeed , _this.sEase  ,function()
         {
             _this.nEX = _this.jxwrap.position().top;
             end();
@@ -875,10 +838,10 @@ JXSLIDER.prototype.rmv = function(v)
     var _this = this;
     var ntx = _this.nMove * v * -1; //최종 움직일 칸 사이즈
 
-    if ( _this.default.sDirection == "horizontal")
+    if ( _this.defaults.sDirection == "horizontal")
     {
 
-        _this.jxwrap.stop().animate( {"left": ntx } ,  _this.default.nUlSpeed , _this.sEase  ,function()
+        _this.jxwrap.stop().animate( {"left": ntx } ,  _this.defaults.nUlSpeed , _this.sEase  ,function()
         {
             _this.nEX = _this.jxwrap.position().left;
             //console.log('right end '  , _this.nEX , _this.jxwrap.offset().left )
@@ -887,7 +850,7 @@ JXSLIDER.prototype.rmv = function(v)
     }
     else
     {
-        _this.jxwrap.stop().animate( {"top": ntx } ,  _this.default.nUlSpeed , _this.sEase  ,function()
+        _this.jxwrap.stop().animate( {"top": ntx } ,  _this.defaults.nUlSpeed , _this.sEase  ,function()
         {
             _this.nEX = _this.jxwrap.position().top;
             end();
@@ -899,9 +862,9 @@ JXSLIDER.prototype.rmv = function(v)
     {
         _this.bIng = false;
 
-        if ( _this.default.bLoop )
+        if ( _this.defaults.bLoop )
         {
-            if ( _this.default.sDirection == "horizontal")
+            if ( _this.defaults.sDirection == "horizontal")
             {
                 _this.jxwrap.css( {"left": 0 } );
             }
@@ -936,7 +899,7 @@ JXSLIDER.prototype.addEventControl = function()
     var _this = this;
     //.jxunit 갯수만큼 버튼을 생성하고
 
-    //console.log('addEventControl    ' , _this.default.nView)
+    //console.log('addEventControl    ' , _this.defaults.nView)
     //re
 
     _this.jxcontrol.empty();
@@ -957,14 +920,14 @@ JXSLIDER.prototype.addEventControl = function()
 
         _this.select( $(this).index() );
 
-        if ( _this.default.bAuto ) { _this.addEventAuto(true); }
+        if ( _this.defaults.bAuto ) { _this.addEventAuto(true); }
 
     }).mouseenter(function(event)
     {
-        if ( _this.default.bAuto ) { _this.addEventAuto(false); }
+        if ( _this.defaults.bAuto ) { _this.addEventAuto(false); }
     }).mouseleave(function(event)
     {
-        if ( _this.default.bAuto ) { _this.addEventAuto(true); }
+        if ( _this.defaults.bAuto ) { _this.addEventAuto(true); }
         _this.bMovIng = false;
     });
 
@@ -975,22 +938,26 @@ JXSLIDER.prototype.select = function(v)
 {
      var _this = this;
      var nChr = _this.nCurrPaging - v;
-        _this.nCurrPaging = v;
-        //_this.nCurr = _this.default.nView * _this.nCurrPaging; //몇번째 .jxunit 인지를 담는다
-        _this.nCurr = _this.nCurrPaging; //몇번째 .jxunit 인지를 담는다
 
-       if ( _this.default.bGroupMove )
+        //_this.nCurr = _this.defaults.nView * _this.nCurrPaging; //몇번째 .jxunit 인지를 담는다
+        //_this.nCurr = v; //몇번째 .jxunit 인지를 담는다
+
+        _this.nCurrPaging = v;
+
+       if ( _this.defaults.bGroupMove )
        {
-            var view = _this.default.nView;
+            _this.nCurr = v * _this.defaults.nView ;
+            var view = _this.defaults.nView;
        }
        else
        {
+            _this.nCurr = v;
             var view = 1;
        }
 
         if (nChr < 0)
         {
-            if ( _this.default.bLoop )
+            if ( _this.defaults.bLoop )
             {
                 _this.rmv( Math.abs(nChr) * view );
             }
@@ -1003,7 +970,7 @@ JXSLIDER.prototype.select = function(v)
         if (nChr > 0)
         {
 
-            if ( _this.default.bLoop )
+            if ( _this.defaults.bLoop )
             {
                 _this.lmv(Math.abs(nChr) * view );
             }
@@ -1048,7 +1015,7 @@ JXSLIDER.prototype.addEventDrag = function()
    _this.jxbox.bind( sEventOver , function(e)
     {
         //console.log("over")
-        //if ( _this.default.bAuto ) { _this.addEventAuto(false); }
+        //if ( _this.defaults.bAuto ) { _this.addEventAuto(false); }
 
         //e.preventDefault();
 
@@ -1062,7 +1029,7 @@ JXSLIDER.prototype.addEventDrag = function()
         _this.bPcIng = true;
         _this.nAddStep = 0;
 
-        if ( _this.default.bAuto ) { _this.addEventAuto(false); }
+        if ( _this.defaults.bAuto ) { _this.addEventAuto(false); }
 
     }).bind (sEventMove, function(e)
     {
@@ -1082,11 +1049,12 @@ JXSLIDER.prototype.addEventDrag = function()
          nCX = nMX - nSX; //드래그 차이값
          nCY = nMY - nSY; //드래그 차이값
 
-        if ( _this.default.sDirection == "horizontal")
+        if ( _this.defaults.sDirection == "horizontal")
         {
             if ( Math.abs(nCX) > Math.abs(nCY)  )
             {
-                e.preventDefault();  //console.log(" x축 값이 더 크면 스크롤 막자 ")
+                e.preventDefault();
+                e.preventDefault();  //console.log(" x축 값이 더 크면 스크롤 막자 ") }
             }
             else
             {
@@ -1097,31 +1065,29 @@ JXSLIDER.prototype.addEventDrag = function()
         {
             if ( Math.abs(nCX) < Math.abs(nCY)  )
             {
-                e.preventDefault();  //console.log(" x축 값이 더 크면 스크롤 막자 ")
+                e.preventDefault();  //console.log(" x축 값이 더 크면 스크롤 막자 ") }
             }
             else
             {
                 return; //console.log("좌우 움직이지 마")
             }
-
         }
 
-
-        if ( _this.default.bLoop )
+        if ( _this.defaults.bLoop )
         {
             //루프 일때
 
-            if ( _this.default.sDirection == "horizontal")
+            if ( _this.defaults.sDirection == "horizontal")
             {
                 //가로형
-                if ( !_this.default.bGroupMove )
+                if ( !_this.defaults.bGroupMove )
                 {
                     _this.nCopy = Math.abs(  Math.ceil( nCX /  _this.nMove  ) ) ; //몇개의 .jxunit를 이동할 타이밍 잡기 왼드래그할땐 0부터 시작이고 우드래그할땐 1부터 시작
                 }
                 else
                 {
                     //console.log('rrrr')
-                    _this.nCopy =  _this.default.nView;
+                    _this.nCopy =  _this.defaults.nView;
                     //_this.nCopy = Math.abs(  Math.ceil( nCX /  _this.nMove  ) ) ; //몇개의 .jxunit를 이동할 타이밍 잡기 왼드래그할땐 0부터 시작이고 우드래그할땐 1부터 시작
                 }
 
@@ -1129,10 +1095,10 @@ JXSLIDER.prototype.addEventDrag = function()
                 {
                     //우에서 왼으로 드래그 할때
                      //console.log('<<<<<<<<<<<<<<<' )
-                     if ( _this.default.bGroupMove )
+                     if ( _this.defaults.bGroupMove )
                      {
                         //왼쪽으로 드래그할때만
-                         //_this.nSave = 4;//_this.default.nView;
+                         //_this.nSave = 4;//_this.defaults.nView;
                      }
 
                     if( _this.nSave != _this.nCopy )
@@ -1141,7 +1107,7 @@ JXSLIDER.prototype.addEventDrag = function()
 
                         _this.nSave = _this.nCopy;
 
-                        if ( !_this.default.bGroupMove )
+                        if ( !_this.defaults.bGroupMove )
                         {
                             _this.nAddStep++; //몇개의 li값 붙는지 저장하고
                             var $jxunit = _this.jxwrap.find(">.jx-unit:first") // 첫번째를 뒤에 붙이고
@@ -1159,7 +1125,7 @@ JXSLIDER.prototype.addEventDrag = function()
                     {
 
                         _this.nSave = _this.nCopy;
-                        if ( !_this.default.bGroupMove )
+                        if ( !_this.defaults.bGroupMove )
                         {
                             _this.nAddStep--; //몇개의 .jxunit값 붙는지 저장하고
                             var $jxunit = _this.jxwrap.find(">.jx-unit:last"); //마지막을 앞에 붙이고
@@ -1167,13 +1133,13 @@ JXSLIDER.prototype.addEventDrag = function()
                         }
                         else
                         {
-                            if ( _this.nCurr - _this.default.nView < 0 && _this.nTotal % _this.default.nView != 0)
+                            if ( _this.nCurr - _this.defaults.nView < 0 && _this.nTotal % _this.defaults.nView != 0)
                             {
-                                _this.nAddStep = _this.nTotal % _this.default.nView * -1;
+                                _this.nAddStep = _this.nTotal % _this.defaults.nView * -1;
                             }
                             else
                             {
-                                _this.nAddStep = _this.default.nView * -1; //몇개의 li값 붙는지 저장하고
+                                _this.nAddStep = _this.defaults.nView * -1; //몇개의 li값 붙는지 저장하고
                             }
 
                             for(var i = 0 ; i < Math.abs(_this.nAddStep) ; i++)
@@ -1192,13 +1158,13 @@ JXSLIDER.prototype.addEventDrag = function()
             {
 
                 //세로형
-                if ( !_this.default.bGroupMove )
+                if ( !_this.defaults.bGroupMove )
                 {
                     _this.nCopy = Math.abs(  Math.ceil( nCY /  _this.nMove  ) ) ; //몇개의 .jxunit를 이동할 타이밍 잡기 왼드래그할땐 0부터 시작이고 우드래그할땐 1부터 시작
                 }
                 else
                 {
-                    _this.nCopy =  _this.default.nView;
+                    _this.nCopy =  _this.defaults.nView;
                     //_this.nCopy = Math.abs(  Math.ceil( nCX /  _this.nMove  ) ) ; //몇개의 .jxunit를 이동할 타이밍 잡기 왼드래그할땐 0부터 시작이고 우드래그할땐 1부터 시작
                 }
 
@@ -1213,7 +1179,7 @@ JXSLIDER.prototype.addEventDrag = function()
                         //console.log('c  '   , _this.nCurr)
                         _this.nSave = _this.nCopy;
 
-                        if ( !_this.default.bGroupMove )
+                        if ( !_this.defaults.bGroupMove )
                         {
                             _this.nAddStep++; //몇개의 li값 붙는지 저장하고
                             var $jxunit = _this.jxwrap.find(">.jx-unit:first") // 첫번째를 뒤에 붙이고
@@ -1230,7 +1196,7 @@ JXSLIDER.prototype.addEventDrag = function()
                     if( _this.nSave != _this.nCopy )
                     {
                         _this.nSave = _this.nCopy;
-                        if ( !_this.default.bGroupMove )
+                        if ( !_this.defaults.bGroupMove )
                         {
                             _this.nAddStep--; //몇개의 .jxunit값 붙는지 저장하고
                             var $jxunit = _this.jxwrap.find(">.jx-unit:last"); //마지막을 앞에 붙이고
@@ -1239,13 +1205,13 @@ JXSLIDER.prototype.addEventDrag = function()
                         else
                         {
 
-                            if ( _this.nCurr - _this.default.nView < 0 && _this.nTotal % _this.default.nView != 0)
+                            if ( _this.nCurr - _this.defaults.nView < 0 && _this.nTotal % _this.defaults.nView != 0)
                             {
-                                _this.nAddStep = _this.nTotal % _this.default.nView * -1;
+                                _this.nAddStep = _this.nTotal % _this.defaults.nView * -1;
                             }
                             else
                             {
-                                _this.nAddStep = _this.default.nView * -1; //몇개의 li값 붙는지 저장하고
+                                _this.nAddStep = _this.defaults.nView * -1; //몇개의 li값 붙는지 저장하고
                             }
 
                             for(var i = 0 ; i < Math.abs(_this.nAddStep) ; i++)
@@ -1264,7 +1230,7 @@ JXSLIDER.prototype.addEventDrag = function()
                 var ntx = _this.nEY + nCY - (   _this.nMove * _this.nAddStep * -1  );
             }
 
-            if ( _this.default.sDirection == "horizontal")
+            if ( _this.defaults.sDirection == "horizontal")
             {
                 //console.log('move ' , ntx)
                 _this.jxwrap.css({ "left" : ntx }); //ul을 이동하고
@@ -1277,8 +1243,9 @@ JXSLIDER.prototype.addEventDrag = function()
         }
         else
         {
-            //loop 가 아닐때/
-            if ( _this.default.sDirection == "horizontal")
+            //loop 가 아닐때
+
+            if ( _this.defaults.sDirection == "horizontal")
             {
                 _this.jxwrap.css( { "left" : _this.nEX + nCX } ); //ul을 이동하고
             }
@@ -1286,6 +1253,8 @@ JXSLIDER.prototype.addEventDrag = function()
             {
                 _this.jxwrap.css( { "top" : _this.nEY + nCY } ); //ul을 이동하고
             }
+
+            //console.log('loop 가 아닐때 ' ,_this.nEX , nCX )
 
         }
 
@@ -1298,27 +1267,29 @@ JXSLIDER.prototype.addEventDrag = function()
 
         _this.bPcIng = false; //피시에서 드래그 계속 되는것을 방지
 
-        if ( _this.default.bAuto  ) { _this.addEventAuto(true); }
+        if ( _this.defaults.bAuto  ) { _this.addEventAuto(true); }
 
 
-        if( _this.default.bLoop )
+        if( _this.defaults.bLoop )
         {
 
-            if ( _this.default.sDirection == "horizontal")
+            if ( _this.defaults.sDirection == "horizontal")
             {
                 //루프 좌우
-                if ( nCX <  _this.default.nSans * -1 )
+                if ( nCX <  _this.defaults.nSans * -1 )
                 {
                     e.preventDefault();
-                    /* 왼쪽으로 드래그는 _this.default.nSans (40) 보다 크게 움직였다는거여서 한번은 움직여야함 */
+                    //console.log('loop left --- end  = ' , _this.nCurr , _this.nCurrPaging)
+
                     var ntx = loopLeftUpNTX();
-                    _this.jxwrap.stop().animate({"left": ntx },  _this.default.nUlSpeed , _this.sEase , left_end );
+                    _this.jxwrap.stop().animate({"left": ntx },  _this.defaults.nUlSpeed , _this.sEase , left_end );
+
                 }
-                else if ( nCX > _this.default.nSans )
+                else if ( nCX > _this.defaults.nSans )
                 {
                     e.preventDefault();
                     var ntx = loopRightDownDragNTX();
-                    _this.jxwrap.stop().animate({"left": ntx },  _this.default.nUlSpeed , _this.sEase  ,stop_end );
+                    _this.jxwrap.stop().animate({"left": ntx },  _this.defaults.nUlSpeed , _this.sEase  ,stop_end );
                 }
                 else
                 {
@@ -1329,13 +1300,12 @@ JXSLIDER.prototype.addEventDrag = function()
                     }
                     if ( nCX >  0 )
                     {
-
-                        _this.jxwrap.stop().animate({"left": _this.nMove * _this.nAddStep },  _this.default.nUlSpeed , _this.sEase  ,right_end );
+                        _this.jxwrap.stop().animate({"left": _this.nMove * _this.nAddStep },  _this.defaults.nUlSpeed , _this.sEase  ,right_end );
                     }
                     if ( nCX < 0 )
                     {
                         //console.log("루프 아주 작게움직였다 왼쪽으로 " );
-                        _this.jxwrap.stop().animate({"left": 0 },  _this.default.nUlSpeed , _this.sEase  , stop_end );
+                        _this.jxwrap.stop().animate({"left": 0 },  _this.defaults.nUlSpeed , _this.sEase  , stop_end );
                     }
                 }
 
@@ -1343,18 +1313,20 @@ JXSLIDER.prototype.addEventDrag = function()
             else
             {
                 //루프 상하
-                if ( nCY <  _this.default.nSans*-1 )
+                if ( nCY <  _this.defaults.nSans*-1 )
                 {
                     e.preventDefault();
+
                     var ntx = loopLeftUpNTX();
-                    _this.jxwrap.stop().animate({"top": ntx },  _this.default.nUlSpeed , _this.sEase , left_end );
+                    _this.jxwrap.stop().animate({"top": ntx },  _this.defaults.nUlSpeed , _this.sEase , left_end );
                 }
-                else if ( nCY > _this.default.nSans )
+                else if ( nCY > _this.defaults.nSans )
                 {
                     e.preventDefault();
+
                     var ntx = loopRightDownDragNTX();
                     //console.log(  "오른쪽으로 드래그" );
-                    _this.jxwrap.stop().animate({"top": ntx },  _this.default.nUlSpeed , _this.sEase  , stop_end );
+                    _this.jxwrap.stop().animate({"top": ntx },  _this.defaults.nUlSpeed , _this.sEase  , stop_end );
 
                 }
                 else
@@ -1368,13 +1340,13 @@ JXSLIDER.prototype.addEventDrag = function()
 
                     if ( nCY >  0 )
                     {
-                        _this.jxwrap.stop().animate({"top": _this.nMove * _this.nAddStep },  _this.default.nUlSpeed , _this.sEase , right_end );
+                        _this.jxwrap.stop().animate({"top": _this.nMove * _this.nAddStep },  _this.defaults.nUlSpeed , _this.sEase , right_end );
                     }
 
                     if ( nCY < 0 )
                     {
                         //console.log("아주 작게움직였다 위쪽으로 " , nCX );
-                        _this.jxwrap.stop().animate({"top": 0 },  _this.default.nUlSpeed , _this.sEase , stop_end );
+                        _this.jxwrap.stop().animate({"top": 0 },  _this.defaults.nUlSpeed , _this.sEase , stop_end );
                     }
                 }
 
@@ -1389,7 +1361,7 @@ JXSLIDER.prototype.addEventDrag = function()
                 }
 
 
-                if ( !_this.default.bGroupMove )
+                if ( !_this.defaults.bGroupMove )
                 {
                     _this.nAddStep++;
                     //console.log(  "왼쪽이나 위로 드래그 aa _this.nAddStep=   ", _this.nAddStep );
@@ -1400,16 +1372,20 @@ JXSLIDER.prototype.addEventDrag = function()
 
                     //console.log(' loopLeftUpNTX ' , _this.nCurr )
 
-                    if ( _this.nCurr + _this.default.nView > _this.nTotal-1 )
+                    if ( _this.nCurr + _this.defaults.nView > _this.nTotal-1 )
                     {
 
                         //_this.rv( _this.nTotal - _this.nCurr );
                         _this.nAddStep = (_this.nTotal - _this.nCurr);
+                        //console.log(  "왼쪽이나 위로 드래그 bb _this.nAddStep=  aa ", _this.nCurr , " ,  " , _this.nTotal , _this.nAddStep );
+
                     }
                     else
                     {
-                        //_this.rv( _this.default.nView );
-                        _this.nAddStep = _this.default.nView;
+                        //_this.rv( _this.defaults.nView );
+                        _this.nAddStep = _this.defaults.nView;
+
+                        //console.log(  "왼쪽이나 위로 드래그 bb _this.nAddStep=  bb ", _this.nAddStep );
                     }
                     //console.log(  "왼쪽이나 위로 드래그 bb _this.nAddStep=   ", _this.nAddStep );
                     //_this.nAddStep *= 2;
@@ -1435,10 +1411,10 @@ JXSLIDER.prototype.addEventDrag = function()
 
             function left_end()
             {
-
+                //console.log('left_end = '  , _this.nCurr , _this.nCurrPaging )
                 //var npa = (_this.nAddStep == 1)? 0 : 1;
                 var npa;
-                if ( !_this.default.bGroupMove )
+                if ( !_this.defaults.bGroupMove )
                 {
                     npa = (  Math.abs( _this.nAddStep )  == 1)? 0 : Math.abs( _this.nAddStep ) -1;
                 }
@@ -1454,27 +1430,42 @@ JXSLIDER.prototype.addEventDrag = function()
                     _this.jxwrap.append( $jxunit );
                 }
 
+
                 stop_end();
             }//left_end
 
             function right_end()
             {
-                //console.log('right  end  ' , _this.nAddStep)
-                for(var i = 0 ; i < Math.abs(_this.nAddStep) ; i++ )
+                //console.log('right  end  = ' , _this.nCurr , _this.nCurrPaging)
+                for(var i = 0 ; i < Math.abs( _this.nAddStep ) ; i++ )
                 {
                     var $jxunit = _this.jxwrap.find(">.jx-unit:first");
                     _this.jxwrap.append( $jxunit );
                 }
 
+
                 stop_end();
 
             }//right_end
 
+            function currCal()
+            {
+                _this.nCurr = _this.jxwrap.find(">.jx-unit").eq(_this.defaults.nBackCopy).data("num");
+                if ( _this.defaults.bGroupMove )
+                {
+                    _this.nCurrPaging = Math.floor( _this.nCurr / _this.defaults.nView ) ;
+                }
+                else
+                {
+                    _this.nCurrPaging = _this.nCurr;
+                }
+
+            }//paging
+
             function stop_end()
             {
-                //console.log('stop_end  _this.nAddStep ' , _this.nAddStep )
 
-                if ( _this.default.sDirection == "horizontal")
+                if ( _this.defaults.sDirection == "horizontal")
                 {
                     _this.jxwrap.css({"left":0});
                 }
@@ -1483,6 +1474,7 @@ JXSLIDER.prototype.addEventDrag = function()
                     _this.jxwrap.css({"top":0});
                 }
 
+                currCal();
                 drag_destrory(); //초기화
             }//stop_end
 
@@ -1490,21 +1482,20 @@ JXSLIDER.prototype.addEventDrag = function()
         else
         {
             // loop가 아닐때
-
            var nAurr;
 
-            //if ( _this.bControl  || _this.default.bGroupMove )
-            if ( _this.default.bGroupMove )
+            //if ( _this.bControl  || _this.defaults.bGroupMove )
+            if ( _this.defaults.bGroupMove )
             {
-                //컨트롤이 있을땐  _this.default.nView 단위로 이동하면 되고
-                //nAurr = ( _this.default.nView == 1 )? 1 : _this.default.nView ; //몇칸을 더할것인지
-                nAurr = _this.default.nView ; //몇칸을 더할것인지
+                //컨트롤이 있을땐  _this.defaults.nView 단위로 이동하면 되고
+                //nAurr = ( _this.defaults.nView == 1 )? 1 : _this.defaults.nView ; //몇칸을 더할것인지
+                nAurr = _this.defaults.nView ; //몇칸을 더할것인지
             }
             else
             {
                 //컨트롤이 없을땐  드래그 한정도에 따라서
-                //var nAurr = ( _this.default.nView == 1 )? 1 : Math.round( nCX / (_this.nMove/_this.nActive ) ); //몇칸을 더할것인지
-                if ( _this.default.sDirection == "horizontal")
+                //var nAurr = ( _this.defaults.nView == 1 )? 1 : Math.round( nCX / (_this.nMove/_this.nActive ) ); //몇칸을 더할것인지
+                if ( _this.defaults.sDirection == "horizontal")
                 {
                     nAurr = Math.ceil( Math.abs ( nCX / _this.nMove  ) ); //몇칸을 더할것인지
                 }
@@ -1515,12 +1506,14 @@ JXSLIDER.prototype.addEventDrag = function()
 
             }
 
-            if ( nCX <  _this.default.nSans * -1 ||  nCY <  _this.default.nSans * -1)
+            if ( nCX <  _this.defaults.nSans * -1 ||  nCY <  _this.defaults.nSans * -1)
             {
                 //console.log("왼쪽으로 드래그  " ,  _this.nCurr  , nAurr )
+                //console.log(' left --- end  = ' , _this.nCurr , _this.nCurrPaging)
+
                 notLoopLeftUpDrag();
             }
-            else if ( nCX > _this.default.nSans || nCY > _this.default.nSans )
+            else if ( nCX > _this.defaults.nSans || nCY > _this.defaults.nSans )
             {
                 //console.log(  "오른쪽으로 드래그" ,  _this.nCurr  , nAurr );
                 notLoopRightDownDrag();
@@ -1537,16 +1530,16 @@ JXSLIDER.prototype.addEventDrag = function()
                     _this.bMovIng = true;
                 }
 
-                //if ( _this.bControl || _this.default.bGroupMove )
-                if ( _this.default.bGroupMove )
+                //if ( _this.bControl || _this.defaults.bGroupMove )
+                if ( _this.defaults.bGroupMove )
                 {
-                    _this.nCurr += _this.default.nView;
-                    _this.nCurrPaging = Math.floor( _this.nCurr/_this.default.nView );
+                    _this.nCurr += _this.defaults.nView;
+                    _this.nCurrPaging = Math.floor( _this.nCurr/_this.defaults.nView );
 
                     if (_this.nCurrPaging  > _this.nTotalPaging - 1)
                     {
                         _this.nCurrPaging = _this.nTotalPaging - 1;
-                        _this.nCurr = _this.nCurrPaging * _this.default.nView +  _this.default.nStart;
+                        _this.nCurr = _this.nCurrPaging * _this.defaults.nView +  _this.defaults.nStart;
                     }
                 }
                 else
@@ -1561,6 +1554,8 @@ JXSLIDER.prototype.addEventDrag = function()
 
                 }
 
+                console.log(' notLoopLeftUpDrag --- end  = ' , _this.nCurr , _this.nCurrPaging)
+
             }//notLoopLeftUpDrag
 
             function notLoopRightDownDrag()
@@ -1570,17 +1565,17 @@ JXSLIDER.prototype.addEventDrag = function()
                     _this.bMovIng = true;
                 }
 
-                //if ( _this.bControl || _this.default.bGroupMove )
-                if ( _this.default.bGroupMove )
+                //if ( _this.bControl || _this.defaults.bGroupMove )
+                if ( _this.defaults.bGroupMove )
                 {
-                    _this.nCurr -= _this.default.nView;
-                    _this.nCurrPaging = Math.floor( _this.nCurr/_this.default.nView );
+                    _this.nCurr -= _this.defaults.nView;
+                    _this.nCurrPaging = Math.floor( _this.nCurr/_this.defaults.nView );
 
                     if (_this.nCurrPaging  < 0 )
                     {
                         _this.nCurrPaging = 0;
-                        //_this.nCurr = _this.nCurrPaging * _this.default.nView;
-                        _this.nCurr = _this.nCurrPaging * _this.default.nView + _this.default.nStart;
+                        //_this.nCurr = _this.nCurrPaging * _this.defaults.nView;
+                        _this.nCurr = _this.nCurrPaging * _this.defaults.nView + _this.defaults.nStart;
                     }
 
                 }
@@ -1594,30 +1589,27 @@ JXSLIDER.prototype.addEventDrag = function()
                     }
                 }
 
+                console.log(' notLoopRightDownDrag --- end  = ' , _this.nCurr , _this.nCurrPaging)
+
             }//notLoopRightDownDrag
 
-            //console.log(  " 드래그" ,  _this.nCurr  ,   Math.round( _this.nCurr / _this.default.nView ) , Math.ceil( _this.nCurr / _this.default.nView )  , Math.floor( _this.nCurr / _this.default.nView ) );
-
-            console.log('ntx  ' , _this.nMove , _this.nCurr)
-
-
             var ntx = _this.nMove * _this.nCurr  * -1;
-            // var ntx = _this.nMove * (  Math.floor( _this.nCurr / _this.default.nView )  * _this.default.nView  )  * -1;
+            // var ntx = _this.nMove * (  Math.floor( _this.nCurr / _this.defaults.nView )  * _this.defaults.nView  )  * -1;
 
-            if ( _this.default.sDirection == "horizontal")
+            if ( _this.defaults.sDirection == "horizontal")
             {
-                _this.jxwrap.stop().animate({"left" : ntx } ,  _this.default.nUlSpeed , _this.sEase  ,drag_destrory);
+                _this.jxwrap.stop().animate({"left" : ntx } ,  _this.defaults.nUlSpeed , _this.sEase  ,drag_destrory);
             }
             else
             {
-                _this.jxwrap.stop().animate({"top" : ntx } ,  _this.default.nUlSpeed , _this.sEase  ,drag_destrory);
+                _this.jxwrap.stop().animate({"top" : ntx } ,  _this.defaults.nUlSpeed , _this.sEase  ,drag_destrory);
             }
 
-        }// if( _this.default.bLoop )
+        }// if( _this.defaults.bLoop )
 
         function drag_destrory()
         {
-            if ( _this.default.sDirection == "horizontal")
+            if ( _this.defaults.sDirection == "horizontal")
             {
                 _this.nEX = _this.jxwrap.position().left; //드래그 다시 할때 필요한 엔드 값을 담는다.
             }
@@ -1626,13 +1618,9 @@ JXSLIDER.prototype.addEventDrag = function()
                 _this.nEX = _this.jxwrap.position().top; //드래그 다시 할때 필요한 엔드 값을 담는다.
             }
 
-
             _this.bPcIng = false; //피시 드래그 방지
-
             _this.bIng = false;
             _this.bMovIng = false;
-            //console.log("e drag_destrory------------------------------" , _this.bMovIng)
-
             _this.nSave = 0;
             _this.nCopy = 0;
             nPX = nPY = undefined;
@@ -1654,31 +1642,42 @@ JXSLIDER.prototype.callback = function()
 
     var _this = this;
 
-    if ( _this.default.bLoop )
+    if ( _this.defaults.bLoop )
     {
+        // _this.nCurr = _this.jxwrap.find(">.jx-unit").eq(_this.defaults.nBackCopy).data("num");
+        // if ( this.defaults.bGroupMove )
+        // {
+        //     _this.nCurrPaging = Math.floor( _this.nCurr / _this.defaults.nView ) ;
+        // }
+        // else
+        // {
+        //     _this.nCurrPaging = _this.nCurr;
+        // }
 
-        _this.nCurr = _this.jxwrap.find(">.jx-unit").eq(_this.default.nBackCopy).data("num");
-        if ( this.default.bGroupMove )
-        {
-            _this.nCurrPaging = Math.floor( _this.nCurr / _this.default.nView ) ;
-        }
-        else
-        {
-            _this.nCurrPaging = _this.nCurr;
-        }
+        _this.jxwrap.find(">.jx-unit").eq(_this.defaults.nBackCopy).addClass("on").siblings().removeClass("on");
 
-        _this.jxwrap.find(">.jx-unit").eq(_this.default.nBackCopy).addClass("on").siblings().removeClass("on");
+        var nH = _this.jxwrap.find(">.jx-unit").eq( _this.defaults.nBackCopy ).innerHeight();
+
     }
     else
     {
         _this.jxwrap.find(">.jx-unit").eq(_this.nCurr).addClass("on").siblings().removeClass("on");
+
+        var nH = _this.jxwrap.find(">.jx-unit").eq( _this.nCurr ).innerHeight();
+    }
+
+    //console.log('call---------- ' , _this.nCurr , _this.nCurrPaging)
+
+    if ( _this.defaults.bAaptiveHeight )
+    {
+        _this.jxwrap.stop().animate({"height": nH }, _this.defaults.nUlSpeed , _this.sEase);
     }
 
 
     if ( this.bControl )
-    //if ( this.bControl && this.default.bGroupMove )
+    //if ( this.bControl && this.defaults.bGroupMove )
     {
-        if ( this.default.bGroupMove )
+        if ( this.defaults.bGroupMove )
         {
             this.jxcontrol.find(".jx-cbtn").eq( this.nCurrPaging ).addClass("on").siblings(".jx-cbtn").removeClass("on");
         }
@@ -1689,22 +1688,22 @@ JXSLIDER.prototype.callback = function()
     }
 
 
-    //console.log('call   ' ,  _this.default.reCallFnc , typeof _this.default.reCallFnc ,  _this.default.reCallFnc !="" , typeof window[ _this.default.reCallFnc ] === 'function')
+    //console.log('call   ' ,  _this.defaults.reCallFnc , typeof _this.defaults.reCallFnc ,  _this.defaults.reCallFnc !="" , typeof window[ _this.defaults.reCallFnc ] === 'function')
 
-    if ( typeof _this.default.reCallFnc === 'string' )
+    if ( typeof _this.defaults.reCallFnc === 'string' )
     {
-        var str = _this.default.reCallFnc.split(' ').join('');
+        var str = _this.defaults.reCallFnc.split(' ').join('');
         if( str.length > 0 && typeof window[str] === 'function')
         {
             //console.log('일단 빈문자가 아닌 함수명도 있고 함수도 정의된 경우만 ')
 
-            if( this.bControl || _this.default.bGroupMove )
+            if( this.bControl || _this.defaults.bGroupMove )
             {
-                eval( _this.default.reCallFnc )(this.nCurrPaging);
+                eval( _this.defaults.reCallFnc )(this.nCurrPaging);
             }
             else
             {
-                eval( _this.default.reCallFnc )(this.nCurr);
+                eval( _this.defaults.reCallFnc )(this.nCurr);
             }
 
         }
@@ -1726,30 +1725,38 @@ JXSLIDER.prototype.callback = function()
 JXSLIDER.prototype.resize = function()
 {
     var _this = this;
-    _this.default.bResize = true;
-
-    //console.log('re ' , this.default.nView)
-    //this.nMove =  this.jxbox.innerWidth() / this.nView ; // 한번씩 이동할 거리를 저장해둠
+    _this.defaults.bResize = true;
 
     this.reSet();
 
-    if ( _this.default.sDirection == "horizontal")
+    if ( _this.defaults.sDirection == "horizontal")
     {
-        this.nMove =  Math.ceil(this.jxbox.innerWidth() / this.default.nView) ; // 한번씩 이동할 거리를 저장해둠
-        this.jxwrap.find(">.jx-unit").css({"width": Math.ceil( this.jxbox.innerWidth() / this.default.nView )-_this.default.nMargin , "margin-right": _this.default.nMargin }); // .jx-unit의 가로사이즈와 간격 ( 추후에 가로냐 세로냐를 추가해야함)
+        this.nMove =  Math.ceil(this.jxbox.innerWidth() / this.defaults.nView) ; // 한번씩 이동할 거리를 저장해둠
+        this.jxwrap.find(">.jx-unit").css({"width": Math.ceil( this.jxbox.innerWidth() / this.defaults.nView )-_this.defaults.nMargin , "margin-right": _this.defaults.nMargin }); // .jx-unit의 가로사이즈와 간격 ( 추후에 가로냐 세로냐를 추가해야함)
 
-        //console.log('wid ' , this.jxbox.width() , this.jxbox.innerWidth() ,   this.jxbox.outerWidth(true)   , ( this.jxbox.innerWidth() / this.default.nView )-_this.default.nMargin    )
+        //console.log('wid ' , this.jxbox.width() , this.jxbox.innerWidth() ,   this.jxbox.outerWidth(true)   , ( this.jxbox.innerWidth() / this.defaults.nView )-_this.defaults.nMargin    )
         this.jxwrap.css({"width" : this.nMove * this.nTotal }) // ul의 가로 사이즈를 .jx-unit의 갯수만큼
     }
     else
     {
-        this.nMove =  Math.ceil(this.jxbox.innerHeight() / this.default.nView) ; // 한번씩 이동할 거리를 저장해둠
-        this.jxwrap.find(">.jx-unit").css({"height": Math.ceil( this.jxbox.innerHeight() / this.default.nView )-_this.default.nMargin , "margin-bottom": _this.default.nMargin , "float" : "none" }); // .jx-unit의 가로사이즈와 간격 ( 추후에 가로냐 세로냐를 추가해야함)
+        this.nMove =  Math.ceil(this.jxbox.innerHeight() / this.defaults.nView) ; // 한번씩 이동할 거리를 저장해둠
+        this.jxwrap.find(">.jx-unit").css({"height": Math.ceil( this.jxbox.innerHeight() / this.defaults.nView )-_this.defaults.nMargin , "margin-bottom": _this.defaults.nMargin , "float" : "none" }); // .jx-unit의 가로사이즈와 간격 ( 추후에 가로냐 세로냐를 추가해야함)
         this.jxwrap.css({"height" : this.nMove * this.nTotal }) // ul의 가로 사이즈를 .jxunit의 갯수만큼
     }
-    //this.default.nView = 4; //response가 있다면 그룹단위로 움지기이게 하지 말거나 페이징을 다시 바궈야함
 
-    //console.log( "resize   nMove = " + this.nMove )
+
+    if ( !_this.defaults.bLoop )
+    {
+        //루프가 아닐때는 리사이징 될때 박스의 위치가 틀어지므로 재위치를 잡아야한다.
+        _this.nEX = _this.nCurr * this.nMove * -1;
+        this.jxwrap.css({"left" : _this.nEX });
+    }
+
+    if( _this.defaults.bAuto )
+    {
+        _this.addEventAuto( true );
+    }
+
 }//JXSLIDER.prototype.resize
 
 

@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, target-densityDpi=device-dpi">
     <link rel="stylesheet" href="resources/css/jxslider-ver-x1.css">
 
-    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.js"></script>
-    <script src="https://code.jquery.com/jquery-migrate-1.4.1.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.9.1.js"></script>
+    <script src="https://code.jquery.com/jquery-migrate-1.2.1.js"></script>
     <!-- <script src="../jquery-1.9.1.min.js"></script>
     <script src="../jquery-migrate-1.2.1.min.js"></script> -->
 
@@ -17,9 +17,12 @@
     <style>
 
     * {margin:0;padding:0;}
+    html,body {height: 100%;}
+    body {overflow-x:hidden;}
+
     .title {background-color: #efefef;padding: 1%;}
-    .cont_box {overflow:hidden;margin: 50px auto;width: 50%;overflow:hidden;}
-    .cont_box_vertical {height: 500px;}
+    .cont_box {margin: 50px auto;width: 50%;overflow:hidden;outline: #aaa dotted 3px;}
+    .cont_box_vertical {height: 500px;height: 30%;margin-bottom: 300px;}
 
     </style>
 
@@ -27,12 +30,11 @@
 </head>
 <body>
 
-
-<section class="title">
+<div class="title">
     <h3>new JXSLIDER( $("#jx-slider-1") );</h3>
-</section>
+</div>
 
-<section class="cont_box">
+<div class="cont_box">
 
     <div class="jx-slider" id="jx-slider-1">
 
@@ -40,7 +42,7 @@
             <div class="jx-wrap">
                 <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_1.jpg" alt=""></span></div></div>
                 <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_2.jpg" alt=""></span></div></div>
-                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_3.jpg" alt=""></span></div></div>
+                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_3.jpg" alt=""></span> </div></div>
                 <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_4.jpg" alt=""></span></div></div>
                 <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_5.jpg" alt=""></span></div></div>
                 <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_6.jpg" alt=""></span></div></div>
@@ -49,16 +51,14 @@
         </div>
 
     </div>
+</div>
 
-
-</section>
-
-<section class="title">
+<div class="title">
     <h3>new JXSLIDER( $("#jx-slider-2") , { nView : 2 } );</h3>
 
-</section>
+</div>
 
-<section class="cont_box">
+<div class="cont_box">
     <div class="jx-slider" id="jx-slider-2">
 
         <div class="jx-box">
@@ -73,14 +73,14 @@
         </div>
 
     </div>
-</section>
+</div>
 
-<section class="title">
+<div class="title">
     <h3>new JXSLIDER( $("#jx-slider-3") , { nView : 3 , bAuto :  true , nAutoSpeed : 1000 } );</h3>
 
-</section>
+</div>
 
-<section class="cont_box">
+<div class="cont_box">
     <div class="jx-slider" id="jx-slider-3">
 
         <div class="jx-box">
@@ -97,14 +97,14 @@
 
         <button type="button" class="jx-stop">stop</button>
     </div>
-</section>
+</div>
 
-<section class="title">
+<div class="title">
     <h3>new JXSLIDER( $("#jx-slider-4") , { nView : 3 , bGroupMove :  true  } );</h3>
 
-</section>
+</div>
 
-<section class="cont_box">
+<div class="cont_box">
 
 
     <div class="jx-slider" id="jx-slider-4">
@@ -116,6 +116,7 @@
                 <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_3.jpg" alt=""></span></div></div>
                 <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_4.jpg" alt=""></span></div></div>
                 <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_5.jpg" alt=""></span></div></div>
+
             </div>
         </div>
 
@@ -124,14 +125,14 @@
         <button type="button" class="jx-btn jx-left">&lt; </button>
         <button type="button" class="jx-btn jx-right">&gt; </button>
     </div>
-</section>
+</div>
 
 
 
-<section class="title">
+<div class="title">
     <h3>new JXSLIDER( $("#jx-slider-5") , { nView : 3 , bLoop : false } );</h3>
-</section>
-<section class="cont_box">
+</div>
+<div class="cont_box">
 
     <div class="jx-slider" id="jx-slider-5">
 
@@ -152,15 +153,72 @@
 
 
     </div>
-</section>
+</div>
 
-<section class="title">
+<div class="title">
     <h3>new JXSLIDER( $("#jx-slider-6") , { nView : 3 , bGroupMove :  true , bLoop : false } );</h3>
-</section>
+</div>
 
-<section class="cont_box">
+<div class="cont_box">
 
     <div class="jx-slider" id="jx-slider-6">
+
+        <div class="jx-box">
+            <div class="jx-wrap">
+                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_1.jpg" alt=""></span></div></div>
+                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_2.jpg" alt=""></span></div></div>
+                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_3.jpg" alt=""></span></div></div>
+                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_4.jpg" alt=""></span></div></div>
+                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_5.jpg" alt=""></span></div></div>
+                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_1.jpg" alt=""></span></div></div>
+                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_2.jpg" alt=""></span></div></div>
+                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_3.jpg" alt=""></span></div></div>
+                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_4.jpg" alt=""></span></div></div>
+                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_5.jpg" alt=""></span></div></div>
+            </div>
+        </div>
+
+        <div class="jx-control"> </div>
+
+        <button type="button" class="jx-btn jx-left">&lt; </button>
+        <button type="button" class="jx-btn jx-right">&gt; </button>
+
+    </div>
+</div>
+
+<div class="title">
+    <h3>new JXSLIDER( $("#jx-slider-7") , { nView : 3 , nBackCopy :  1 } );</h3>
+
+</div>
+
+<div class="cont_box">
+    <div class="jx-slider" id="jx-slider-7">
+
+        <div class="jx-box">
+            <div class="jx-wrap">
+                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_1.jpg" alt=""></span></div></div>
+                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_2.jpg" alt=""></span></div></div>
+                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_3.jpg" alt=""></span></div></div>
+                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_4.jpg" alt=""></span></div></div>
+                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_5.jpg" alt=""></span></div></div>
+            </div>
+        </div>
+
+        <button type="button" class="jx-btn jx-left">&lt; </button>
+        <button type="button" class="jx-btn jx-right">&gt; </button>
+    </div>
+</div>
+
+
+
+
+<div class="title">
+    <h3>new JXSLIDER( $("#jx-slider-8") , { nView : 3 , nStart :  2 } );</h3>
+
+</div>
+
+<div class="cont_box">
+    <div class="jx-slider" id="jx-slider-8">
 
         <div class="jx-box">
             <div class="jx-wrap">
@@ -177,64 +235,14 @@
         <button type="button" class="jx-btn jx-left">&lt; </button>
         <button type="button" class="jx-btn jx-right">&gt; </button>
 
-    </div>
-</section>
-
-<section class="title">
-    <h3>new JXSLIDER( $("#jx-slider-7") , { nView : 3 , nBackCopy :  1 } );</h3>
-
-</section>
-
-<section class="cont_box">
-    <div class="jx-slider" id="jx-slider-7">
-
-        <div class="jx-box">
-            <div class="jx-wrap">
-                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_1.jpg" alt=""></span></div></div>
-                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_2.jpg" alt=""></span></div></div>
-                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_3.jpg" alt=""></span></div></div>
-                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_4.jpg" alt=""></span></div></div>
-                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_5.jpg" alt=""></span></div></div>
-            </div>
-        </div>
-
-        <button type="button" class="jx-btn jx-left">&lt; </button>
-        <button type="button" class="jx-btn jx-right">&gt; </button>
-    </div>
-</section>
-
-
-
-
-<section class="title">
-    <h3>new JXSLIDER( $("#jx-slider-8") , { nView : 3 , nStart :  2 } );</h3>
-
-</section>
-
-<section class="cont_box">
-    <div class="jx-slider" id="jx-slider-8">
-
-        <div class="jx-box">
-            <div class="jx-wrap">
-                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_1.jpg" alt=""></span></div></div>
-                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_2.jpg" alt=""></span></div></div>
-                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_3.jpg" alt=""></span></div></div>
-                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_4.jpg" alt=""></span></div></div>
-                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_5.jpg" alt=""></span></div></div>
-            </div>
-        </div>
-
-        <button type="button" class="jx-btn jx-left">&lt; </button>
-        <button type="button" class="jx-btn jx-right">&gt; </button>
-
 
     </div>
-</section>
+</div>
 
-<section class="title">
+<div class="title">
     <h3>new JXSLIDER( $("#jx-slider-9") , { nView : 3 , bResize :  false } );</h3>
-</section>
-<section class="cont_box ">
+</div>
+<div class="cont_box ">
 
     <div class="jx-slider" id="jx-slider-9">
 
@@ -253,13 +261,13 @@
 
 
     </div>
-</section>
+</div>
 
 
-<section class="title">
+<div class="title">
     <h3>new JXSLIDER( $("#jx-slider-10") , { nView : 3 , bAction : true } );</h3>
-</section>
-<section class="cont_box">
+</div>
+<div class="cont_box">
 
     <div class="jx-slider" id="jx-slider-10">
 
@@ -278,15 +286,15 @@
 
 
     </div>
-</section>
+</div>
 
 
-<section class="title">
+<div class="title">
 <h3>new JXSLIDER( $("#jx-slider-11") , { nView : 3 , sDirection : 'vertical' } );</h3>
 
-</section>
+</div>
 
-<section class="cont_box cont_box_vertical">
+<div class="cont_box cont_box_vertical">
 
     <div class="jx-slider" id="jx-slider-11">
 
@@ -304,9 +312,9 @@
         <button type="button" class="jx-btn jx-right">&gt; </button>
 
     </div>
-</section>
+</div>
 
-<section class="title">
+<div class="title">
 <h3>new JXSLIDER( $("#jx-slider-12") , { nView : 3 , reCallFnc : 'call' } ); <br>
 
     function call(v)
@@ -315,9 +323,9 @@
 
     }
     </h3>
-</section>
+</div>
 
-<section class="cont_box">
+<div class="cont_box">
 
     <div class="jx-slider" id="jx-slider-12">
 
@@ -336,10 +344,10 @@
 
 
     </div>
-</section>
+</div>
 
 
-<section class="title">
+<div class="title">
 <h3>new JXSLIDER( $("#jx-slider-13") , { nView : 3 , <br>
               oResponsive: [<br>
                 {<br>
@@ -354,9 +362,9 @@
 
 
     </h3>
-</section>
+</div>
 
-<section class="cont_box">
+<div class="cont_box">
 
     <div class="jx-slider" id="jx-slider-13">
 
@@ -377,21 +385,62 @@
 
 
     </div>
-</section>
+</div>
 
 
 
-<section class="title">
-    <h3>var jx14= new JXSLIDER( $("#jx-slider-14") , { nView : 3  } );<br>
-    jx14.left();<br>
-    jx14.right();<br>
-    : 외부 버튼을 이용하여 좌우 움직이기 메소드
+<div class="title">
+    <h3>new JXSLIDER( $("#jx-slider-14") , { bAaptiveHeight : true } );</h3>
+</div>
 
-    </h3>
-</section>
-<section class="cont_box">
+<div class="cont_box">
 
     <div class="jx-slider" id="jx-slider-14">
+
+        <div class="jx-box">
+            <div class="jx-wrap">
+                <div class="jx-unit">
+                    <div class="jx-cont">
+                        <span class="thumb"><img src="resources/imgs/img_1.jpg" alt=""></span>
+                        <p>각종 페브릭 제품</p>
+
+                    </div>
+                </div>
+                <div class="jx-unit">
+                    <div class="jx-cont">
+                        <span class="thumb"><img src="resources/imgs/img_2.jpg" alt=""></span>
+                        <p>크림제품</p>
+                        <p>화이트</p>
+                        <p>레드</p>
+                        <p>블랙</p>
+                    </div>
+                </div>
+                <div class="jx-unit"><div class="jx-cont"><span class="thumb"><img src="resources/imgs/img_3.jpg" alt=""></span>
+                    <p>향초</p>
+                </div></div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+
+<div class="title">
+    <h3>var jx15= new JXSLIDER( $("#jx-slider-15") , { nView : 3  } );<br>
+    jx15.left();<br>
+    jx15.right();<br>
+    : 직접 만든 버튼을 이용하여 좌우 움직이기 메소드
+
+    </h3>
+</div>
+<div class="cont_box">
+
+    <div class="jx-slider" id="jx-slider-15">
 
         <div class="jx-box">
             <div class="jx-wrap">
@@ -409,20 +458,20 @@
     <button type="button" class="btn-left-1">left</button>
     <button type="button" class="btn-right-1">right</button>
 
-</section>
+</div>
 
 
 
-<section class="title">
-    <h3>var jx15 = new JXSLIDER( $("#jx-slider-15") , { nView : 3} );<br>
-    jx15.select( 숫자 )<br>
-    외부 버튼을 이용하여 원하는 객체로 이동<br>
+<div class="title">
+    <h3>var jx16 = new JXSLIDER( $("#jx-slider-16") , { nView : 3} );<br>
+    jx16.select( 숫자 )<br>
+    직접 만든 버튼을 이용하여 원하는 객체로 이동<br>
     즉 옵션 bGroupMove = true면 페이징단위로 숫자를 넘겨야하고 false면 객체 순서되로 숫자를 넘기면 된다.<br>
 
     </h3>
-</section>
-<section class="cont_box ">
-    <div class="jx-slider" id="jx-slider-15">
+</div>
+<div class="cont_box ">
+    <div class="jx-slider" id="jx-slider-16">
 
         <div class="jx-box">
             <div class="jx-wrap">
@@ -444,17 +493,30 @@
         <button type="button">5</button>
     </div>
 
-</section>
+</div>
 
 
 <script>
 
 
-    new JXSLIDER( $("#jx-slider-1") );
+
+    var ua = navigator.userAgent;
+
+    if ( !/firefox|chrome|safari|opera|opr/i.test(ua) )
+    {
+    //    alert ( window.addEventListener != undefined )
+    }
+
+    //pc에서 드래그 해야할땐
+    window.document.ondragstart = new Function("return false");    //드래그 금지
+
+
+
+    new JXSLIDER( $("#jx-slider-1"));
 
     new JXSLIDER( $("#jx-slider-2") , { nView : 2 } );
 
-    new JXSLIDER( $("#jx-slider-3") , { nView : 3 , bAuto :  true , nAutoSpeed : 1000 } );
+    new JXSLIDER( $("#jx-slider-3") , { nView : 3 , bAuto :  false , nAutoSpeed : 1000 } );
 
     new JXSLIDER( $("#jx-slider-4") , { nView : 3 , bGroupMove :  true  } );
 
@@ -498,23 +560,25 @@
                 }
             ] } );
 
+    new JXSLIDER( $("#jx-slider-14") , { bAaptiveHeight : true } );
 
-    var jx14= new JXSLIDER( $("#jx-slider-14") , { nView : 3  } );
+
+    var jx15= new JXSLIDER( $("#jx-slider-15") , { nView : 3  } );
     $(".btn-left-1").click(function(event)
     {
-         jx14.left();
+         jx15.left();
     });
 
     $(".btn-right-1").click(function(event)
     {
-         jx14.right();
+         jx15.right();
     });
 
 
-    var jx15 = new JXSLIDER( $("#jx-slider-15") , { nView : 3} );
+    var jx16 = new JXSLIDER( $("#jx-slider-16") , { nView : 3} );
     $(".paging button").click(function(event)
     {
-        jx15.select(  $(this).index() );
+        jx16.select(  $(this).index() );
     });
 
 </script>
