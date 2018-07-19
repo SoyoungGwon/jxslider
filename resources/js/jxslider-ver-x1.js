@@ -860,7 +860,7 @@ JXSLIDER.prototype.addEventControl = function()
 {
     var _this = this;
 
-    _this.jxcontrol.empty();
+    _this.jxcontrol.find('.jx-cbtn').remove();//empty();
     //.jxunit 갯수만큼 버튼을 생성하고
     for(var i = 0 ; i < _this.nTotalPaging ; i++ )
     {
